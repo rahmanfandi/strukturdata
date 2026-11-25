@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Simulasi Binary Search Tree</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+    <style>
+        :root {
+            --bg: #e9eef3;
+            --card: #fff;
+            --ink: #14212e;
+            --mut: #5a6b7b;
+            --line: #cdd7e0;
+            --ac: #1f4fd8;
+            --acx: #fff;
+            --node: #eef2f6;
+            --cur: #ffc233;
+            --found: #3ecf8e;
+            --new: #5b8cff;
+            --del: #ff6b6b;
+            --done: #c9b8f5;
+            --hlx: #14212e;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        @media (prefers-color-scheme:dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #0f1620;
+                --card: #18222e;
+                --ink: #e6edf4;
+                --mut: #92a3b4;
+                --line: #2b3a4a;
+                --ac: #7aa2ff;
+                --acx: #0f1620;
+                --node: #223142
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #0f1620;
+            --card: #18222e;
+            --ink: #e6edf4;
+            --mut: #92a3b4;
+            --line: #2b3a4a;
+            --ac: #7aa2ff;
+            --acx: #0f1620;
+            --node: #223142
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px)
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+            line-height: 1.5
+        }
+
+        .wrap {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 18px 14px 40px
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0 0 4px;
+            letter-spacing: -.01em
+        }
+
+        h2 {
+            font-size: 1rem;
+            margin: 0 0 10px
+        }
+
+        .sub {
+            margin: 0 0 16px;
+            color: var(--mut);
+            max-width: 62ch
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px
+        }
+
+        .row:last-child {
+            margin-bottom: 0
+        }
+
+        input[type=text],
+        input[type=number] {
+            font: inherit;
+            color: var(--ink);
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 8px 10px;
+            min-height: 40px
+        }
+
+        #seq {
+            flex: 1 1 220px;
+            min-width: 0
+        }
+
+        #val {
+            width: 110px
+        }
+
+        button {
+            font: inherit;
+            font-weight: 500;
+            color: var(--ink);
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 8px 12px;
+            min-height: 40px;
+            cursor: pointer
+        }
+
+        button:hover:not(:disabled) {
+            border-color: var(--ac)
+        }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: 2px solid var(--ac);
+            outline-offset: 2px
+        }
+
+        button:disabled {
+            opacity: .4;
+            cursor: default
+        }
+
+        button.pri {
+            background: var(--ac);
+            color: var(--acx);
+            border-color: var(--ac)
+        }
+
+        .grp {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding-right: 10px;
+            margin-right: 2px;
+            border-right: 1px solid var(--line)
+        }
+
+        .grp:last-child {
+            border-right: 0
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 30px
+        }
+
+        .chip {
+            min-width: 34px;
+            text-align: center;
+            padding: 3px 8px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: var(--bg);
+            font-weight: 500
+        }
+
+        .chip.done {
+            background: var(--done);
+            color: var(--hlx);
+            border-color: var(--done)
+        }
+
+        .chip.cur {
+            background: var(--cur);
+            color: var(--hlx);
+            border-color: var(--cur)
+        }
+
+        .stats {
+            color: var(--mut);
+            font-size: .9rem;
+            margin-bottom: 6px
+        }
+
+        .canvas {
+            overflow-x: auto;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--bg)
+        }
+
+        #svg {
+            display: block;
+            margin: 0 auto
+        }
+
+        .ed {
+            stroke: var(--mut);
+            stroke-width: 1.5
+        }
+
+        .g circle {
+            fill: var(--node);
+            stroke: var(--mut);
+            stroke-width: 1.5;
+            transition: fill .2s
+        }
+
+        .g text {
+            fill: var(--ink);
+            font-weight: 700;
+            font-size: 16px;
+            text-anchor: middle;
+            dominant-baseline: central
+        }
+
+        .g.cur circle {
+            fill: var(--cur)
+        }
+
+        .g.found circle {
+            fill: var(--found)
+        }
+
+        .g.new circle {
+            fill: var(--new)
+        }
+
+        .g.del circle {
+            fill: var(--del)
+        }
+
+        .g.done circle {
+            fill: var(--done)
+        }
+
+        .g.cur text,
+        .g.found text,
+        .g.new text,
+        .g.del text,
+        .g.done text {
+            fill: var(--hlx)
+        }
+
+        .empty {
+            fill: var(--mut);
+            font-size: 14px;
+            text-anchor: middle
+        }
+
+        .out {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center
+        }
+
+        .out b {
+            margin-right: 4px
+        }
+
+        .expl {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-left: 4px solid var(--ac);
+            background: var(--bg);
+            border-radius: 0 8px 8px 0;
+            min-height: 3.2em
+        }
+
+        .ctrl {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-top: 10px
+        }
+
+        #ctr {
+            font-weight: 500;
+            min-width: 64px;
+            text-align: center
+        }
+
+        .ctrl label {
+            margin-left: auto;
+            color: var(--mut);
+            font-size: .9rem;
+            display: flex;
+            gap: 6px;
+            align-items: center
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+            font-size: .85rem;
+            color: var(--mut)
+        }
+
+        .legend i {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: -1px
+        }
+
+        @media (prefers-reduced-motion:reduce) {
+            .g circle {
+                transition: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>Simulasi Binary Search Tree</h1>
+        <p class="sub">Aturan: anak kiri &lt; induk &lt; anak kanan. Jalankan sebuah operasi, lalu ikuti prosesnya satu
+            langkah demi satu langkah.</p>
+
+        <section class="card">
+            <h2>Deret angka</h2>
+            <div class="row">
+                <input type="text" id="seq" placeholder="Contoh: 50, 30, 70, 20, 40, 60, 80" aria-label="Deret angka">
+                <button id="build">Bangun dari deret</button>
+            </div>
+            <div class="row">
+                <label>Jumlah angka <input type="number" id="cnt" min="1" max="15" value="7" style="width:72px"></label>
+                <button id="rnd" class="pri">Acak deret dan bangun</button>
+            </div>
+            <div class="chips" id="chips"></div>
+        </section>
+
+        <section class="card">
+            <h2>Operasi</h2>
+            <div class="row">
+                <div class="grp">
+                    <input type="number" id="val" placeholder="Angka" aria-label="Angka">
+                    <button data-op="insert">Insert</button>
+                    <button data-op="search">Cari</button>
+                    <button data-op="delete">Hapus</button>
+                </div>
+                <div class="grp">
+                    <button data-op="min">Min</button>
+                    <button data-op="max">Max</button>
+                </div>
+                <button id="reset">Kosongkan</button>
+            </div>
+            <div class="row">
+                <button data-op="in">Inorder</button>
+                <button data-op="pre">Preorder</button>
+                <button data-op="post">Postorder</button>
+                <button data-op="lvl">Level-order</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="stats" id="stats"></div>
+            <div class="canvas"><svg id="svg" role="img" aria-label="Diagram pohon"></svg></div>
+            <div class="out" id="out" hidden></div>
+            <div class="expl" id="expl" aria-live="polite"></div>
+            <div class="ctrl">
+                <button id="first" title="Ke langkah pertama">⏮</button>
+                <button id="prev">◀ Mundur</button>
+                <span id="ctr"></span>
+                <button id="next" class="pri">Lanjut ▶</button>
+                <button id="last" title="Ke langkah terakhir">⏭</button>
+                <button id="play">Putar otomatis</button>
+                <label>Cepat <input type="range" id="spd" min="250" max="1800" value="1000" style="direction:rtl"
+                        aria-label="Kecepatan"> Lambat</label>
+            </div>
+            <div class="legend">
+                <span><i style="background:var(--cur)"></i>Sedang diperiksa</span>
+                <span><i style="background:var(--done)"></i>Sudah dilewati</span>
+                <span><i style="background:var(--found)"></i>Ditemukan / hasil</span>
+                <span><i style="background:var(--new)"></i>Node baru / salinan</span>
+                <span><i style="background:var(--del)"></i>Akan dihapus</span>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let uid = 0, root = null, idx = 0, timer = null, seqVals = [];
+        let steps = [{ t: null, hl: {}, text: "Pohon masih kosong. Acak sebuah deret, atau Insert angka satu per satu." }];
+        const $ = id => document.getElementById(id);
+        const N = v => ({ id: ++uid, v, l: null, r: null });
+        const clone = t => t ? { id: t.id, v: t.v, l: clone(t.l), r: clone(t.r) } : null;
+        const loc = (t, f, p = null, d = null) => !t ? null : (f(t) ? { n: t, p, d } : (loc(t.l, f, t, "l") || loc(t.r, f, t, "r")));
+        const height = t => t ? 1 + Math.max(height(t.l), height(t.r)) : 0;
+        const count = t => t ? 1 + count(t.l) + count(t.r) : 0;
+        const S = (t, hl, text, extra) => Object.assign({ t, hl: hl || {}, text }, extra);
+        const H = (trail, cur, cls) => { const h = {}; trail.forEach(i => h[i] = "done"); if (cur != null) h[cur] = cls || "cur"; return h; };
+
+        function insertSteps(base, v) {
+            if (!base) { const t = N(v); return [S(t, { [t.id]: "new" }, `Pohon kosong, jadi ${v} menjadi root.`)]; }
+            const st = []; let c = base; const trail = [];
+            while (true) {
+                if (v === c.v) { st.push(S(base, H(trail, c.id, "found"), `${v} sama dengan ${c.v}. Nilai sudah ada, jadi tidak disisipkan.`)); return st; }
+                const left = v < c.v;
+                st.push(S(base, H(trail, c.id), `Bandingkan ${v} dengan ${c.v}: ${v} ${left ? "<" : ">"} ${c.v}, maka ke ${left ? "kiri" : "kanan"}.`));
+                trail.push(c.id);
+                const nx = left ? c.l : c.r;
+                if (!nx) break;
+                c = nx;
+            }
+            const t = clone(base), p = loc(t, n => n.id === c.id).n, nn = N(v), left = v < c.v;
+            if (left) p.l = nn; else p.r = nn;
+            st.push(S(t, { [nn.id]: "new" }, `Tempat kosong di sisi ${left ? "kiri" : "kanan"} ${c.v}. Sisipkan ${v} di sana.`));
+            return st;
+        }
+
+        function searchSteps(base, v) {
+            if (!base) return [S(base, {}, "Pohon kosong, tidak ada yang bisa dicari.")];
+            const st = []; let c = base; const trail = [];
+            while (c) {
+                if (v === c.v) { st.push(S(base, H(trail, c.id, "found"), `${v} sama dengan ${c.v}. DITEMUKAN setelah ${trail.length + 1} perbandingan.`)); return st; }
+                const left = v < c.v;
+                st.push(S(base, H(trail, c.id), `Bandingkan ${v} dengan ${c.v}: ${v} ${left ? "<" : ">"} ${c.v}, lanjut ke ${left ? "kiri" : "kanan"}.`));
+                trail.push(c.id); c = left ? c.l : c.r;
+            }
+            st.push(S(base, H(trail, null), `Sampai di node kosong. ${v} TIDAK ditemukan.`));
+            return st;
+        }
+
+        function edgeSteps(base, dir) {
+            if (!base) return [S(base, {}, "Pohon kosong.")];
+            const st = [], nm = dir === "l" ? "kiri" : "kanan", w = dir === "l" ? "minimum" : "maksimum", trail = []; let c = base;
+            while (c[dir]) { st.push(S(base, H(trail, c.id), `${c.v} masih punya anak ${nm}, turun ke ${nm}.`)); trail.push(c.id); c = c[dir]; }
+            st.push(S(base, H(trail, c.id, "found"), `${c.v} tidak punya anak ${nm}. Nilai ${w} = ${c.v}.`));
+            return st;
+        }
+
+        function deleteSteps(base, v) {
+            if (!base) return [S(base, {}, "Pohon kosong, tidak ada yang dihapus.")];
+            const st = [], trail = []; let c = base;
+            while (c && c.v !== v) {
+                const left = v < c.v;
+                st.push(S(base, H(trail, c.id), `Cari ${v}: bandingkan dengan ${c.v}, ke ${left ? "kiri" : "kanan"}.`));
+                trail.push(c.id); c = left ? c.l : c.r;
+            }
+            if (!c) { st.push(S(base, H(trail, null), `${v} tidak ditemukan, tidak ada yang dihapus.`)); return st; }
+            const kasus = c.l && c.r ? "Kasus 3: punya dua anak, perlu pengganti." : c.l || c.r ? "Kasus 2: punya satu anak, anaknya naik menggantikan." : "Kasus 1: daun (tanpa anak), langsung dihapus.";
+            st.push(S(base, H(trail, c.id, "del"), `${v} ditemukan. ${kasus}`));
+            if (c.l && c.r) {
+                let s = c.r; const tr = [];
+                st.push(S(base, { [c.id]: "del", [s.id]: "cur" }, `Cari successor: node terkecil di subtree kanan. Mulai dari ${s.v}.`));
+                while (s.l) {
+                    tr.push(s.id); s = s.l;
+                    const h = { [c.id]: "del" }; tr.forEach(i => h[i] = "done"); h[s.id] = "cur";
+                    st.push(S(base, h, `Masih ada anak kiri, turun ke ${s.v}.`));
+                }
+                st.push(S(base, { [c.id]: "del", [s.id]: "found" }, `Successor = ${s.v} (tidak punya anak kiri).`));
+                const t1 = clone(base); loc(t1, n => n.id === c.id).n.v = s.v;
+                st.push(S(t1, { [c.id]: "new", [s.id]: "del" }, `Salin nilai ${s.v} ke node ${v}. Node ${s.v} yang lama di bawah sekarang harus dihapus.`));
+                const t2 = clone(t1), L = loc(t2, n => n.id === s.id), ch = L.n.r;
+                if (L.d === "l") L.p.l = ch; else L.p.r = ch;
+                st.push(S(t2, { [c.id]: "found" }, `Node ${s.v} yang lama dihapus (anak kanannya, jika ada, naik menggantikan). Selesai.`));
+            } else {
+                const t = clone(base), L = loc(t, n => n.id === c.id), ch = L.n.l || L.n.r;
+                let nt = t;
+                if (!L.p) nt = ch; else if (L.d === "l") L.p.l = ch; else L.p.r = ch;
+                st.push(S(nt, ch ? { [ch.id]: "found" } : {}, ch ? `Node ${v} dihapus, anaknya (${ch.v}) naik ke posisinya. Selesai.` : `Node ${v} dihapus. Selesai.`));
+            }
+            return st;
+        }
+
+        function travSteps(base, type) {
+            const nama = { in: "Inorder (Kiri, Node, Kanan)", pre: "Preorder (Node, Kiri, Kanan)", post: "Postorder (Kiri, Kanan, Node)", lvl: "Level-order (per tingkat, kiri ke kanan)" };
+            if (!base) return [S(base, {}, "Pohon kosong, tidak ada yang dikunjungi.")];
+            const order = [];
+            if (type === "lvl") { const q = [base]; while (q.length) { const n = q.shift(); order.push(n); if (n.l) q.push(n.l); if (n.r) q.push(n.r); } }
+            else { const go = n => { if (!n) return; if (type === "pre") order.push(n); go(n.l); if (type === "in") order.push(n); go(n.r); if (type === "post") order.push(n); }; go(base); }
+            const st = [S(base, {}, `${nama[type]}. Mulai dari root ${base.v}.`, { out: [] })];
+            order.forEach((n, i) => {
+                const h = {}; order.slice(0, i).forEach(x => h[x.id] = "done"); h[n.id] = "cur";
+                st.push(S(base, h, `Kunjungi ${n.v}.`, { out: order.slice(0, i + 1).map(x => x.v) }));
+            });
+            const h = {}; order.forEach(x => h[x.id] = "found");
+            st.push(S(base, h, `Selesai.${type === "in" ? " Hasil inorder pada BST selalu terurut menaik." : ""}`, { out: order.map(x => x.v) }));
+            return st;
+        }
+
+        function buildSteps(vals) {
+            let cur = null;
+            const st = [S(null, {}, `Mulai dari pohon kosong, lalu sisipkan ${vals.length} angka berurutan: ${vals.join(", ")}.`, { k: -1 })];
+            vals.forEach((v, k) => {
+                const s = insertSteps(cur, v);
+                s.forEach(x => { x.k = k; x.text = `[Angka ke-${k + 1}: ${v}] ${x.text}`; });
+                st.push(...s); cur = s[s.length - 1].t;
+            });
+            return st;
+        }
+
+        function start(ns, mode) { stop(); steps = ns; idx = mode === "end" ? ns.length - 1 : 0; root = ns[ns.length - 1].t; if (mode === "play" && ns.length > 1) timer = setTimeout(tick, 600); render(); }
+
+        function render() {
+            const s = steps[idx], t = s.t, pos = new Map(); let i = 0;
+            (function walk(n, d) { if (!n) return; walk(n.l, d + 1); pos.set(n.id, { x: i++ * 56 + 40, y: d * 72 + 38, n }); walk(n.r, d + 1); })(t, 0);
+            const W = Math.max(i * 56 + 24, 340), Hh = Math.max(height(t) * 72 + 14, 150);
+            let g = "";
+            pos.forEach(p => { [p.n.l, p.n.r].forEach(c => { if (c) { const q = pos.get(c.id); g += `<line class="ed" x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}"/>`; } }); });
+            pos.forEach(p => { g += `<g class="g ${s.hl[p.n.id] || ""}"><circle cx="${p.x}" cy="${p.y}" r="22"/><text x="${p.x}" y="${p.y}">${p.n.v}</text></g>`; });
+            if (!t) g = `<text class="empty" x="${W / 2}" y="65">(pohon kosong)</text>`;
+            const sv = $("svg"); sv.setAttribute("viewBox", `0 0 ${W} ${Hh}`); sv.setAttribute("width", W); sv.setAttribute("height", Hh); sv.innerHTML = g;
+            let mn = "-", mx = "-"; if (t) { let a = t; while (a.l) a = a.l; mn = a.v; a = t; while (a.r) a = a.r; mx = a.v; }
+            $("stats").textContent = `Jumlah node: ${count(t)}   Tinggi: ${height(t)}   Min: ${mn}   Max: ${mx}`;
+            const o = $("out");
+            if (s.out) { o.hidden = false; o.innerHTML = "<b>Urutan kunjungan:</b>" + (s.out.length ? s.out.map(v => `<span class="chip">${v}</span>`).join("") : "<span>(belum ada)</span>"); } else o.hidden = true;
+            $("expl").textContent = s.text;
+            $("ctr").textContent = `${idx + 1} / ${steps.length}`;
+            $("prev").disabled = $("first").disabled = idx === 0;
+            $("next").disabled = $("last").disabled = idx === steps.length - 1;
+            $("play").textContent = timer ? "Jeda" : "Putar otomatis";
+            $("chips").innerHTML = seqVals.map((v, k) => `<span class="chip ${s.k === undefined ? "" : k < s.k ? "done" : k === s.k ? "cur" : ""}">${v}</span>`).join("");
+        }
+
+        function go(n) { idx = Math.max(0, Math.min(steps.length - 1, n)); render(); }
+        function stop() { if (timer) { clearTimeout(timer); timer = null; } }
+        function tick() {
+            if (idx >= steps.length - 1) { stop(); render(); return; }
+            go(idx + 1);
+            if (idx >= steps.length - 1) { stop(); render(); return; }
+            timer = setTimeout(tick, +$("spd").value);
+        }
+        $("play").onclick = () => {
+            if (timer) { stop(); render(); return; }
+            if (idx >= steps.length - 1) idx = 0;
+            render(); timer = setTimeout(tick, +$("spd").value); $("play").textContent = "Jeda";
+        };
+        $("next").onclick = () => { stop(); go(idx + 1); };
+        $("prev").onclick = () => { stop(); go(idx - 1); };
+        $("first").onclick = () => { stop(); go(0); };
+        $("last").onclick = () => { stop(); go(steps.length - 1); };
+
+        function readVal() { const v = parseInt($("val").value, 10); return Number.isNaN(v) ? null : v; }
+        document.querySelectorAll("[data-op]").forEach(b => b.onclick = () => {
+            const op = b.dataset.op;
+            if (["insert", "search", "delete"].includes(op)) {
+                const v = readVal();
+                if (v === null) { start([S(root, {}, "Isi kolom Angka dulu, lalu pilih operasinya.")]); return; }
+                start(op === "insert" ? insertSteps(root, v) : op === "search" ? searchSteps(root, v) : deleteSteps(root, v));
+            } else if (op === "min") start(edgeSteps(root, "l"));
+            else if (op === "max") start(edgeSteps(root, "r"));
+            else start(travSteps(root, op));
+        });
+        $("val").addEventListener("keydown", e => { if (e.key === "Enter") { const v = readVal(); if (v !== null) start(insertSteps(root, v)); } });
+        $("reset").onclick = () => { seqVals = []; start([S(null, {}, "Pohon dikosongkan.")]); };
+
+        function buildFrom(vals) {
+            if (!vals.length) { start([S(root, {}, "Deret kosong. Ketik angka dipisah koma, atau pakai tombol acak.")]); return; }
+            seqVals = vals; start(buildSteps(vals), "play");
+        }
+        $("build").onclick = () => {
+            const vals = $("seq").value.split(/[\s,;]+/).map(x => parseInt(x, 10)).filter(x => !Number.isNaN(x)).slice(0, 30);
+            buildFrom(vals);
+        };
+        $("rnd").onclick = () => {
+            const n = Math.max(1, Math.min(15, parseInt($("cnt").value, 10) || 7)), pool = new Set();
+            while (pool.size < n) pool.add(1 + Math.floor(Math.random() * 99));
+            const vals = [...pool];
+            $("seq").value = vals.join(", ");
+            buildFrom(vals);
+        };
+        seqVals = [50, 30, 70, 20, 40, 60, 80]; $("seq").value = seqVals.join(", ");
+        start(buildSteps(seqVals), "end");
+    </script>
+</body>
+
+</html>
